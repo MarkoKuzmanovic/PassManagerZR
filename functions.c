@@ -4,24 +4,38 @@
 
 
 // 6
+// 7
+// 11
+static inline int getNextPasswordId() {
+	static int passwordId = 0;
+
+	return passwordId++;
+}
+
 
 void addPassword(Password passwords[], int* numPasswords) {
+	if (passwords == NULL || numPasswords == NULL) {
+		printf("Invalid parameters in addPassword().\n");
+		return;
+	}
 	Password newPwd;
 	printf("Enter website: ");
 	fgets(newPwd.website, MAX_LENGTH, stdin);
-	newPwd.website[strcspn(newPwd.website, "\n")] = '\0'; // Remove trailing newline
+	newPwd.website[strcspn(newPwd.website, "\n")] = '\0';
 
 	printf("Enter username: ");
 	fgets(newPwd.username, MAX_LENGTH, stdin);
-	newPwd.username[strcspn(newPwd.username, "\n")] = '\0'; // Remove trailing newline
+	newPwd.username[strcspn(newPwd.username, "\n")] = '\0';
 
 	printf("Enter password: ");
 	fgets(newPwd.password, MAX_LENGTH, stdin);
-	newPwd.password[strcspn(newPwd.password, "\n")] = '\0'; // Remove trailing newline
+	newPwd.password[strcspn(newPwd.password, "\n")] = '\0';
 
 	printf("Enter description: ");
 	fgets(newPwd.description, MAX_LENGTH, stdin);
-	newPwd.description[strcspn(newPwd.description, "\n")] = '\0'; // Remove trailing newline
+	newPwd.description[strcspn(newPwd.description, "\n")] = '\0';
+
+	newPwd.id = getNextPasswordId();
 
 	passwords[*numPasswords] = newPwd;
 	(*numPasswords)++;
@@ -30,8 +44,13 @@ void addPassword(Password passwords[], int* numPasswords) {
 }
 
 
-void updatePassword(Password passwords[], int* numPasswords) { 
-	if (numPasswords == 0) {
+void updatePassword(Password passwords[], int* numPasswords) {
+	if (passwords == NULL || numPasswords == NULL) {
+		printf("Invalid parameters in updatePassword().\n");
+		return;
+	}
+
+	if (*numPasswords == 0) {
 		printf("No passwords stored.\n");
 		return;
 	}
@@ -40,51 +59,60 @@ void updatePassword(Password passwords[], int* numPasswords) {
 	printf("Enter website for the password you want to update: ");
 	scanf("%s", website);
 
-	int i;
-	for (i = 0; i < numPasswords; i++) {
+	static int i; // 5
+
+	for (i = 0; i < *numPasswords; i++) {
 		if (strcmp(passwords[i].website, website) == 0) {
-			printf("Enter new password ");
+			printf("Enter new password: ");
 			scanf("%s", passwords[i].password);
-			printf("Password updated");
+			printf("Password updated.\n");
 			return;
 		}
-
 	}
 
 	printf("Password not found!\n");
-
 }
 
-void deletePassword(Password passwords[], int* numPasswords) {  
-	if (numPasswords == 0) {
+
+void deletePassword(Password passwords[], int* numPasswords) {
+	if (passwords == NULL || numPasswords == NULL) {
+		printf("Invalid parameters in deletePassword().\n");
+		return;
+	}
+
+	if (*numPasswords == 0) {
 		printf("No passwords stored.\n");
 		return;
 	}
 
+
 	char website[MAX_LENGTH];
 	printf("Enter website for the password you want to delete: ");
-	scanf("%s", website);
+	fgets(website, MAX_LENGTH, stdin);
+	website[strcspn(website, "\n")] = '\0'; // Remove trailing newline
 
 	int i;
-	for (i = 0; i < *numPasswords; i++) {    // 4 
+	for (i = 0; i < *numPasswords; i++) {
 		if (strcmp(passwords[i].website, website) == 0) {
 			(*numPasswords)--;
-			for (int j = i; j < *numPasswords; j++) { //9
+			for (int j = i; j < *numPasswords; j++) {
 				passwords[j] = passwords[j + 1];
-
 			}
 			printf("Password deleted.\n");
 			return;
 		}
-
-
 	}
 
 	printf("Password not found.\n");
-
 }
 
-void displayPassword(Password passwords[], int numPasswords) {
+
+void displayPassword(const Password passwords[], int numPasswords) {
+	if (passwords == NULL) {
+		printf("Invalid parameters in displayPassword().\n");
+		return;
+	}
+
 	if (numPasswords == 0) {
 		printf("No passwords stored.\n");
 		return;
@@ -101,12 +129,12 @@ void displayPassword(Password passwords[], int numPasswords) {
 	}
 }
 
-// 10
 
-int savePasswords(const char* filename, Password passwords[], int numPasswords) {
-	FILE* file = fopen(filename, "w");  
-	if (file == NULL) {
-		return 0; 
+
+int savePasswords(FILE* file, const Password passwords[], int numPasswords) {
+	if (file == NULL || passwords == NULL) {
+		printf("Invalid parameters in savePasswords().\n");
+		return 0;
 	}
 
 	for (int i = 0; i < numPasswords; i++) {
@@ -114,23 +142,25 @@ int savePasswords(const char* filename, Password passwords[], int numPasswords) 
 			passwords[i].password, passwords[i].description);
 	}
 
-	fclose(file);
-	return 1; 
+	return 1;
 }
 
-int loadPasswords(const char* filename, Password passwords[], int* numPasswords) {
-	FILE* file = fopen(filename, "r");
-	if (file == NULL) {
+
+int loadPasswords(FILE* file, Password passwords[], int* numPasswords) {
+	if (file == NULL || passwords == NULL || numPasswords == NULL) {
+		printf("Invalid parameters in loadPasswords().\n");
 		return 0;
 	}
 
 	*numPasswords = 0;
 
-	while (fscanf(file, "%s %s %s %s", passwords[*numPasswords].website, passwords[*numPasswords].username,
-		passwords[*numPasswords].password, passwords[*numPasswords].description) == 4) {
+	char line[MAX_LENGTH * 4];
+
+	while (fgets(line, sizeof(line), file)) {
+		sscanf(line, "%s %s %s %[^\n]", passwords[*numPasswords].website, passwords[*numPasswords].username,
+			passwords[*numPasswords].password, passwords[*numPasswords].description);
 		(*numPasswords)++;
 	}
 
-	fclose(file);
-	return 1; 
+	return 1;
 }
