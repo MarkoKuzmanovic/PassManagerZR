@@ -1,101 +1,69 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
 #include "functions.h"
 
-// MASTER PASS JE "masterpasspass"
+//MASTER PASSWORD JE "Masterpass"
 
-
+//1
+// 2
+// 6
 int main() {
-	char masterPass[MAX_LENGTH];
-	printf("Enter the Master Pass: ");
-	scanf("%s", masterPass);
-	getchar();
+	char masterPassword[100] = "Masterpass";
 
-	if (strcmp(masterPass, "masterpasspass") != 0) {
-		printf("Incorrect master pass\n");
-		return 1;
-	}
+	printf("Enter the master password: ");
+	char enteredPassword[100];
+	scanf("%s", enteredPassword);
 
-	Password passwords[100];
-	static int numPasswords = 0; // 12
-
-	// 16
-
-	FILE* file = fopen("passwords.txt", "r");
-	if (file == NULL) {
-		printf("Failed to open passwords file.\n");
+	if (strcmp(enteredPassword, masterPassword) != 0) {
+		printf("Invalid master password. Access denied.\n");
 		return 0;
 	}
 
-	if (!loadPasswords(file, passwords, &numPasswords)) {
-		printf("Failed to load passwords from file.\n");
-	}
+	Password* passwords = NULL;
+	int numPasswords = 0;
 
-	fclose(file);
-
-
-	printf("Welcome to the Password Manager!\n");
-
-	// 1
-
-	int choice;
+	loadPasswords(&passwords, &numPasswords);
 
 	// 8
 
+	int choice;
 	do {
-		printf("\nMenu Options:\n");
+		printf("\nPassword Manager Menu:\n");
 		printf("1. Add Password\n");
 		printf("2. Update Password\n");
 		printf("3. Delete Password\n");
-		printf("4. Display Password\n");
-		printf("5. Exit\n");
+		printf("4. Display Passwords\n");
+		printf("5. Save and Quit\n");
 		printf("Enter your choice: ");
-
 		scanf("%d", &choice);
-		while (getchar() != '\n');
 
 		switch (choice) {
 		case 1:
-			addPassword(passwords, &numPasswords);
-			//	savePasswords("passwords.txt", passwords, numPasswords);
+			addPassword(&passwords, &numPasswords);
 			break;
 		case 2:
 			updatePassword(passwords, numPasswords);
-			//	savePasswords("passwords.txt", passwords, numPasswords);
 			break;
 		case 3:
-			deletePassword(passwords, &numPasswords);
-			//	savePasswords("passwords.txt", passwords, numPasswords);
+			deletePassword(&passwords, &numPasswords);
 			break;
 		case 4:
-			displayPassword(passwords, numPasswords);
+			displayPasswords(passwords, numPasswords);
 			break;
 		case 5:
-			printf("Exiting the Password Manager. Goodbye!\n");
+			savePasswords(passwords, numPasswords);
+			printf("Passwords saved successfully. Exiting...\n");
 			break;
 		default:
-			printf("Invalid Choice\n");
+			printf("Invalid choice. Please try again.\n");
+			break;
 		}
-
-		if (choice >= 1 && choice <= 4) {
-			FILE* file = fopen("passwords.txt", "w");
-			if (file == NULL) {
-				printf("Failed to open passwords file.\n");
-				return 1;
-			}
-
-			if (!savePasswords(file, passwords, numPasswords)) {
-				printf("Failed to save passwords to file.\n");
-				fclose(file);
-				return 1;
-			}
-
-			fclose(file);
-		}
-
 	} while (choice != 5);
+
+
+	// 15
+	free(passwords);
 
 	return 0;
 }

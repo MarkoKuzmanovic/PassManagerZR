@@ -1,28 +1,29 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-#define MAX_LENGTH 100
-
 // 3
-// 2
 // 10
 typedef struct {
+	char website[100];
+	char username[100];
+	char password[100];
 	int id;
-	char website[MAX_LENGTH];
-	char username[MAX_LENGTH];
-	char password[MAX_LENGTH];
-	char description[MAX_LENGTH];
 } Password;
 
-// 4
+// 5
+// 12
+static inline int getNextPasswordId(Password* passwords, int numPasswords);
 
-void addPassword(Password passwords[], int* numPasswords);
-void updatePassword(Password passwords[], int* numPasswords);
-void deletePassword(Password passwords[], int* numPasswords);
-void displayPassword(const Password passwords[], int numPasswords);
-int loadPasswords(FILE* file, Password passwords[], int* numPasswords);
-int savePasswords(FILE* file, const Password passwords[], int numPasswords);
-static inline int getNextPasswordId();
+void addPassword(Password** passwords, int* numPasswords);
 
+void updatePassword(Password* passwords, int numPasswords);
+
+void deletePassword(Password** passwords, int* numPasswords);
+
+void displayPasswords(const Password* passwords, int numPasswords);
+
+void loadPasswords(Password** passwords, int* numPasswords);
+
+void savePasswords(const Password* passwords, int numPasswords);
 
 #endif

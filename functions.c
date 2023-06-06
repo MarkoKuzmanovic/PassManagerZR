@@ -1,166 +1,223 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "functions.h"
 
+// 4
+// 7 
 
-// 6
-// 7
-// 11
-static inline int getNextPasswordId() {
-	static int passwordId = 0;
+static inline int getNextPasswordId(Password* passwords, int numPasswords) {
 
-	return passwordId++;
+	int maxId = 0;
+	for (int i = 0; i < numPasswords; i++) {
+		if (passwords[i].id > maxId) {
+			maxId = passwords[i].id;
+		}
+	}
+	return maxId + 1;
 }
 
+// 13
 
-void addPassword(Password passwords[], int* numPasswords) {
-	if (passwords == NULL || numPasswords == NULL) {
-		printf("Invalid parameters in addPassword().\n");
-		return;
-	}
-	Password newPwd;
+void addPassword(Password** passwords, int* numPasswords) {
+
+	Password newPass;
+
 	printf("Enter website: ");
-	fgets(newPwd.website, MAX_LENGTH, stdin);
-	newPwd.website[strcspn(newPwd.website, "\n")] = '\0';
+	scanf("%s", newPass.website);
 
 	printf("Enter username: ");
-	fgets(newPwd.username, MAX_LENGTH, stdin);
-	newPwd.username[strcspn(newPwd.username, "\n")] = '\0';
+	scanf("%s", newPass.username);
 
 	printf("Enter password: ");
-	fgets(newPwd.password, MAX_LENGTH, stdin);
-	newPwd.password[strcspn(newPwd.password, "\n")] = '\0';
+	scanf("%s", newPass.password);
 
-	printf("Enter description: ");
-	fgets(newPwd.description, MAX_LENGTH, stdin);
-	newPwd.description[strcspn(newPwd.description, "\n")] = '\0';
+	newPass.id = getNextPasswordId(*passwords, *numPasswords);
 
-	newPwd.id = getNextPasswordId();
+	
+	Password* expandedPasswords = realloc(*passwords, (*numPasswords + 1) * sizeof(Password));
+	if (expandedPasswords == NULL) {
+		printf("Memory allocation error.\n");
+		return;
+	}
 
-	passwords[*numPasswords] = newPwd;
+	
+	*passwords = expandedPasswords;
+
+
+	(*passwords)[*numPasswords] = newPass;
 	(*numPasswords)++;
 
-	printf("Password added successfully.\n");
+	printf("Password added successfully!\n");
 }
 
+// 9
 
-void updatePassword(Password passwords[], int* numPasswords) {
-	if (passwords == NULL || numPasswords == NULL) {
-		printf("Invalid parameters in updatePassword().\n");
+void updatePassword(Password* passwords, int numPasswords) {
+	// 14
+	char* website = malloc(100 * sizeof(char));
+	if (website == NULL) {
+		printf("Memory allocation error.\n");
 		return;
 	}
 
-	if (*numPasswords == 0) {
-		printf("No passwords stored.\n");
-		return;
-	}
-
-	char website[MAX_LENGTH];
-	printf("Enter website for the password you want to update: ");
+	printf("Enter the website for the password you want to update: ");
 	scanf("%s", website);
 
-	static int i; // 5
 
-	for (i = 0; i < *numPasswords; i++) {
+	// 21
+	int foundIndex = -1;
+	for (int i = 0; i < numPasswords; i++) {
 		if (strcmp(passwords[i].website, website) == 0) {
-			printf("Enter new password: ");
-			scanf("%s", passwords[i].password);
-			printf("Password updated.\n");
-			return;
+			foundIndex = i;
+			break;
 		}
 	}
+		
+	free(website); 
 
-	printf("Password not found!\n");
+	if (foundIndex == -1) {
+		printf("Password not found for the specified website.\n");
+		return;
+	}
+
+
+	printf("Enter the new password: ");
+	scanf("%s", passwords[foundIndex].password);
+
+	printf("Password updated successfully!\n");
 }
 
 
-void deletePassword(Password passwords[], int* numPasswords) {
-	if (passwords == NULL || numPasswords == NULL) {
-		printf("Invalid parameters in deletePassword().\n");
-		return;
-	}
+void deletePassword(Password** passwords, int* numPasswords) {
+	
+	char website[100];
 
-	if (*numPasswords == 0) {
-		printf("No passwords stored.\n");
-		return;
-	}
+	printf("Enter the website for the password you want to delete: ");
+	scanf("%s", website);
 
-
-	char website[MAX_LENGTH];
-	printf("Enter website for the password you want to delete: ");
-	fgets(website, MAX_LENGTH, stdin);
-	website[strcspn(website, "\n")] = '\0'; // Remove trailing newline
-
-	int i;
-	for (i = 0; i < *numPasswords; i++) {
-		if (strcmp(passwords[i].website, website) == 0) {
-			(*numPasswords)--;
-			for (int j = i; j < *numPasswords; j++) {
-				passwords[j] = passwords[j + 1];
-			}
-			printf("Password deleted.\n");
-			return;
+	int foundIndex = -1;
+	for (int i = 0; i < *numPasswords; i++) {
+		if (strcmp((*passwords)[i].website, website) == 0) {
+			foundIndex = i;
+			break;
 		}
 	}
 
-	printf("Password not found.\n");
+	if (foundIndex == -1) {
+		printf("Password not found for the specified website.\n");
+		return;
+	}
+
+	
+	for (int i = foundIndex; i < *numPasswords - 1; i++) {
+		(*passwords)[i] = (*passwords)[i + 1];
+	}
+
+
+	Password* reducedPasswords = realloc(*passwords, (*numPasswords - 1) * sizeof(Password));
+	if (reducedPasswords == NULL && *numPasswords > 1) {
+		printf("Memory allocation error.\n");
+		return;
+	}
+
+	
+	*passwords = reducedPasswords;
+	(*numPasswords)--;
+
+	printf("Password deleted successfully!\n");
 }
 
 
-void displayPassword(const Password passwords[], int numPasswords) {
-	if (passwords == NULL) {
-		printf("Invalid parameters in displayPassword().\n");
-		return;
-	}
+
+
+
+// 11
+
+void displayPasswords(const Password* passwords, int numPasswords) {
+	
+	printf("Stored Passwords:\n");
 
 	if (numPasswords == 0) {
-		printf("No passwords stored.\n");
+		printf("No passwords found.\n");
 		return;
 	}
-	printf("\n");
-	printf("Stored Passwords:\n");
-	printf("\n");
+
 	for (int i = 0; i < numPasswords; i++) {
 		printf("Website: %s\n", passwords[i].website);
 		printf("Username: %s\n", passwords[i].username);
 		printf("Password: %s\n", passwords[i].password);
-		printf("Description: %s\n", passwords[i].description);
-		printf("---------------------------\n");
+		printf("ID: %d\n", passwords[i].id);
+		printf("---------------\n");
 	}
 }
 
+void loadPasswords(Password** passwords, int* numPasswords) {
 
+	FILE* file = fopen("passwords.txt", "r");
+	if (file == NULL) {
+		printf("Error opening file.\n");
+		return;
+	}
 
-int savePasswords(FILE* file, const Password passwords[], int numPasswords) {
-	if (file == NULL || passwords == NULL) {
-		printf("Invalid parameters in savePasswords().\n");
-		return 0;
+	int initialSize = 10;
+	int capacity = initialSize;
+	int count = 0;
+	Password* tempPasswords = malloc(capacity * sizeof(Password));
+
+	if (tempPasswords == NULL) {
+		printf("Memory allocation error.\n");
+		fclose(file);
+		return;
+	}
+
+	Password password;
+
+	while (fscanf(file, "%99s %99s %99s %d", password.website, password.username, password.password, &password.id) == 4) {
+		if (count == capacity) {
+			capacity *= 2;
+			Password* expandedPasswords = realloc(tempPasswords, capacity * sizeof(Password));
+			if (expandedPasswords == NULL) {
+				printf("Memory allocation error.\n");
+				fclose(file);
+				free(tempPasswords);
+				return;
+			}
+			tempPasswords = expandedPasswords;
+		}
+
+		tempPasswords[count] = password;
+		count++;
+	}
+
+	fclose(file);
+
+	*passwords = malloc(count * sizeof(Password));
+	if (*passwords == NULL) {
+		printf("Memory allocation error.\n");
+		free(tempPasswords);
+		return;
+	}
+
+	memcpy(*passwords, tempPasswords, count * sizeof(Password));
+	*numPasswords = count;
+
+	free(tempPasswords);
+}
+
+// 16
+void savePasswords(const Password* passwords, int numPasswords) {
+
+	FILE* file = fopen("passwords.txt", "w");
+	if (file == NULL) {
+		printf("Error opening file.\n");
+		return;
 	}
 
 	for (int i = 0; i < numPasswords; i++) {
-		fprintf(file, "%s %s %s %s\n", passwords[i].website, passwords[i].username,
-			passwords[i].password, passwords[i].description);
+		fprintf(file, "%s %s %s %d\n", passwords[i].website, passwords[i].username, passwords[i].password, passwords[i].id);
 	}
 
-	return 1;
-}
-
-
-int loadPasswords(FILE* file, Password passwords[], int* numPasswords) {
-	if (file == NULL || passwords == NULL || numPasswords == NULL) {
-		printf("Invalid parameters in loadPasswords().\n");
-		return 0;
-	}
-
-	*numPasswords = 0;
-
-	char line[MAX_LENGTH * 4];
-
-	while (fgets(line, sizeof(line), file)) {
-		sscanf(line, "%s %s %s %[^\n]", passwords[*numPasswords].website, passwords[*numPasswords].username,
-			passwords[*numPasswords].password, passwords[*numPasswords].description);
-		(*numPasswords)++;
-	}
-
-	return 1;
+	fclose(file);
 }
