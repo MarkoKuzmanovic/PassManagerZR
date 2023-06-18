@@ -34,7 +34,9 @@ int main() {
 		printf("2. Update Password\n");
 		printf("3. Delete Password\n");
 		printf("4. Display Passwords\n");
-		printf("5. Save and Quit\n");
+		printf("5. Sort Passwords\n");
+		printf("6. Search Password\n");
+		printf("7. Save and Quit\n");
 		printf("Enter your choice: ");
 		scanf("%d", &choice);
 
@@ -51,15 +53,23 @@ int main() {
 		case 4:
 			displayPasswords(passwords, numPasswords);
 			break;
-		case 5:
+		case 7:
 			savePasswords(passwords, numPasswords);
 			printf("Passwords saved successfully. Exiting...\n");
 			break;
+		case 5:
+			qsort(passwords, numPasswords, sizeof(Password), comparePasswords); // 20
+			printf("Passwords sorted successfully.\n");
+            break;
+		case 6:
+			searchPasswords(passwords, numPasswords);
+			break;
+
 		default:
 			printf("Invalid choice. Please try again.\n");
 			break;
 		}
-	} while (choice != 5);
+	} while (choice != 7);
 
 
 	// 15

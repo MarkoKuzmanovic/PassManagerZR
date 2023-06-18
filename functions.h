@@ -14,6 +14,10 @@ typedef struct {
 // 12
 static inline int getNextPasswordId(Password* passwords, int numPasswords);
 
+int comparePasswords(const void* a, const void* b);
+
+void searchPasswords(const Password* passwords, int numPasswords);
+
 void addPassword(Password** passwords, int* numPasswords);
 
 void updatePassword(Password* passwords, int numPasswords);
