@@ -38,7 +38,14 @@ int main() {
 		printf("6. Search Password\n");
 		printf("7. Save and Quit\n");
 		printf("Enter your choice: ");
-		scanf("%d", &choice);
+		char choiceStr[10];
+		scanf("%s", choiceStr);
+
+		choice = atoi(choiceStr);
+
+		if (choice == 0 && choiceStr[0] != '0') {
+			while (getchar() != '\n');  
+		}
 
 		switch (choice) {
 		case 1:
